@@ -3,65 +3,39 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { FormEvent } from 'react'
-import { TextField, Button, Card, CardContent, Typography, Grid } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
 
 function AlbumPicker() {
   const [albums, setAlbums] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    try {
-      const target = e.target as typeof e.target & {
-        artist: { value: string };
-      };
-      const artist = encodeURIComponent(target.artist.value);
-      const url = `https://musicbrainz.org/ws/2/release?fmt=json&query=artist:${artist}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Error fetching data');
-      const mbResult = await response.json();
-      const { releases } = mbResult as { releases: { title: string }[] };
-      setAlbums(releases.map(({ title }) => title));
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+    const target = e.target as typeof e.target & {
+      artist: { value: string };
+    };
+    const artist = encodeURIComponent(target.artist.value);
+    const url = `https://musicbrainz.org/ws/2/release?fmt=json&query=artist:${artist}`;
+    const response = await fetch(url);
+    const mbResult = (await response.json()) as {
+      releases: { title: string }[];
+    };
+    const { releases } = mbResult;
+    setAlbums(releases.map(({ title }) => title));
   }
-
   return (
-    <form onSubmit={handleSubmit} style={{ padding: '20px' }}>
-      <TextField
-        name="artist"
-        label="Artist Name"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-      />
-      <Button type="submit" variant="contained" color="primary">
-        Search
-      </Button>
-      {isLoading && <CircularProgress />}
-      {error && <Typography color="error">{error}</Typography>}
-      <Grid container spacing={2} style={{ marginTop: '20px' }}>
-        {albums.map((album, index) => (
-          <Grid item key={index} xs={12} sm={6} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">{album}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+    <form onSubmit={handleSubmit}>
+      <label>
+        Artist name:
+        <input name="artist" />
+      </label>
+      <button type="submit">Search</button>
+      <p>Albums:</p>
+      <ol>
+        {albums.map((album) => (
+          <li>{album}</li>
         ))}
-      </Grid>
+      </ol>
     </form>
   );
 }
-
 
 function App() {
   const [count, setCount] = useState(0)
@@ -77,8 +51,8 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <AlbumPicker />
       <h1>Vite + React</h1>
+      <AlbumPicker />
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
