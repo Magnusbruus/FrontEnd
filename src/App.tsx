@@ -28,7 +28,6 @@ function AlbumPicker() {
       </label>
       <button type="submit">Search</button>
       <p>Albums:</p>
-      <AlbumPicker />
       <ol>
         {albums.map((album) => (
           <li>{album}</li>
@@ -52,6 +51,7 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+      <AlbumPicker />
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
